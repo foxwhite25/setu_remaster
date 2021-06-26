@@ -29,16 +29,13 @@ def calculate_value(illust: dict):
 
 def search_random_setu(keyword: str, k: int) -> list:
     temp = []
-    random_time = str_time_prop()
-    print(random_time)
     json_result = aapi.search_illust(keyword, search_target='partial_match_for_tags', sort="date_desc",
-                                     end_date=random_time)
+                                     end_date=str_time_prop())
     if not json_result.illusts:
         return []
     for n in range(math.ceil(k / 30 * config_with_key("multiply"))):
         for illust in json_result.illusts:
             temp.append((illust, calculate_value(illust)))
-            print(illust.create_date)
         next_qs = aapi.parse_qs(json_result.next_url)
         if not next_qs:
             return temp
