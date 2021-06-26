@@ -1,0 +1,13 @@
+{
+  "randomness" : 1,
+  "multiply" : 3,
+  "refresh_token" : "",
+  "proxy" : "",
+  "daily_max" : 50,
+  "freq_limit" : 5,
+  "default" : {
+      "withdraw" : 0,
+      "xml": false,
+      "foward" : true
+  }
+}
