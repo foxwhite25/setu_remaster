@@ -1,7 +1,11 @@
 import asyncio
+import os
+
 import hoshino
 from hoshino.util import DailyNumberLimiter
-from .data import *
+
+from .data import get_random_setu, get_search_setu, download_illust, get_illust_b64, format_illust
+from .lib import config_with_key, RecordDAO, path_dirname
 
 sv = hoshino.Service('setu_remaster', bundle='pcr娱乐')
 tlmt = hoshino.util.DailyNumberLimiter(config_with_key('daily_max'))

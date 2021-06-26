@@ -1,11 +1,14 @@
 import math
 import os.path
 import base64
+import random
 import threading
 
-from lib import *
+
 from pixivpy3 import *
 import urllib.request
+
+from .lib import illust_path, config_with_key, RecordDAO, str_time_prop
 
 aapi = AppPixivAPI()
 papi = PixivAPI()
@@ -116,7 +119,7 @@ def get_illust_b64(illust_id: int) -> str:
 
 def format_illust(illust: dict, b64: str, gid: int) -> str:
     setting = db.fetch_setting(gid)
-    if not setting['xml']:
+    if setting['xml']:
         return f'[CQ:cardimage,file={b64},source={illust.title} (id:{illust.id} author:{illust.user.name})]'
     else:
         return f'title:{illust.title}\nauthor:{illust.user.name}\nid:{illust.id}\n[CQ:image,file=base64://{b64}]'
