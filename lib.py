@@ -7,6 +7,10 @@ import os
 
 path_dirname = os.path.dirname(__file__)
 config_path = os.path.join(path_dirname, 'config.json')
+try:
+    os.mkdir(os.path.join(path_dirname, 'illust'))
+except:
+    pass
 
 
 def load_config():
@@ -41,7 +45,7 @@ def illust_path(illust_id):
 def str_time_prop():
     start_date = int(datetime.datetime.now().timestamp())
     end_date = int(datetime.datetime(2020, 1, 1).timestamp())
-    random_date = random.randint(end_date,start_date)
+    random_date = random.randint(end_date, start_date)
     return datetime.datetime.fromtimestamp(random_date).strftime("%Y-%m-%d")
 
 
