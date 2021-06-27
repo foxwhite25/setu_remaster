@@ -1,16 +1,14 @@
 import datetime
 import random
 import sqlite3
-
-import ujson as json
 import os
+import pathlib
+import ujson as json
+
 
 path_dirname = os.path.dirname(__file__)
 config_path = os.path.join(path_dirname, 'config.json')
-try:
-    os.mkdir(os.path.join(path_dirname, 'illust'))
-except:
-    pass
+pathlib.Path(os.path.join(path_dirname, 'illust')).mkdir(parents=True, exist_ok=True)
 
 
 def load_config():
@@ -73,8 +71,7 @@ class RecordDAO:
         if not i:
             self.update_setting(gid, config_with_key("default"))
             return config_with_key("default")
-        else:
-            return json.loads(i[0][0])
+        return json.loads(i[0][0])
 
     def update_setting(self, gid: int, data: dict):
         with self.connect() as conn:

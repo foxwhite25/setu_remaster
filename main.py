@@ -67,10 +67,10 @@ async def group_setting(bot, ev):
         db.update_setting(gid, setting)
         await bot.finish(ev, msg)
     elif args[0] == 'warehouse':
-        num = len(os.listdir(os.path.join(path_dirname, f'illust')))
+        num = len(os.listdir(os.path.join(path_dirname, 'illust')))
         await bot.finish(ev, f"Current illust count : {num}")
     else:
-        await bot.finish(ev, f"invalid parameter")
+        await bot.finish(ev, "invalid parameter")
 
 
 @sv.on_rex(r'^不够[涩瑟色]|^再来[点张份]|^[涩瑟色]图$|^[再]?来?(\d*)?[份点张]([涩色瑟]图)')
@@ -88,7 +88,7 @@ async def send_random_setu(bot, ev):
     if msg:
         await bot.finish(ev, msg)
     b64_list = get_random_setu(num)
-    await send_illust_list(uid,gid,setting,b64_list,bot,ev)
+    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
 
 
 @sv.on_rex(r'^搜[索]?(\d*)[份张]*(.*?)[涩瑟色]图(.*)')
@@ -98,8 +98,7 @@ async def send_search_setu(bot, ev):
     setting = db.fetch_setting(gid)
     keyword = ev['match'].group(2) or ev['match'].group(3)
     if not keyword:
-        await bot.send(ev, '需要提供关键字')
-        return
+        await bot.finish(ev, '需要提供关键字')
     keyword = keyword.strip()
     num = ev['match'].group(1)
     if num:
@@ -110,7 +109,7 @@ async def send_search_setu(bot, ev):
     if msg:
         await bot.finish(ev, msg)
     b64_list = get_search_setu(keyword, num)
-    await send_illust_list(uid,gid,setting,b64_list,bot,ev)
+    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
 
 
 @sv.on_prefix(r'提取图片')
@@ -122,16 +121,16 @@ async def get_illust(bot, ev):
     b64_list = []
     for arg in args:
         if not arg.isnumeric():
-            bot.finish(ev, f"id应为数字")
+            bot.finish(ev, "id应为数字")
         illust = download_illust(arg)
         if not illust:
             bot.finish(ev, f"找不到id为{arg}的图片")
         b64 = get_illust_b64(arg)
         b64_list.append((illust, b64))
-    await send_illust_list(uid,gid,setting,b64_list,bot,ev)
+    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
 
 
-async def send_illust_list(uid,gid,setting,b64_list,bot,ev):
+async def send_illust_list(uid, gid, setting, b64_list, bot, ev):
     if setting['foward']:
         foward_list = []
         for illust, b64 in b64_list:

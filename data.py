@@ -3,10 +3,9 @@ import os.path
 import base64
 import random
 import threading
-
-
-from pixivpy3 import *
 import urllib.request
+
+from pixivpy3 import AppPixivAPI, PixivAPI
 
 from .lib import illust_path, config_with_key, RecordDAO, str_time_prop
 
@@ -36,7 +35,7 @@ def search_random_setu(keyword: str, k: int) -> list:
                                      end_date=str_time_prop())
     if not json_result.illusts:
         return []
-    for n in range(math.ceil(k / 30 * config_with_key("multiply"))):
+    for _ in range(math.ceil(k / 30 * config_with_key("multiply"))):
         for illust in json_result.illusts:
             temp.append((illust, calculate_value(illust)))
         next_qs = aapi.parse_qs(json_result.next_url)
@@ -55,22 +54,17 @@ def sort_best_from_tuple(illust_list: list, k: int, randomness: int) -> list:
 
 def get_search_setu(keyword: str, k: int) -> list:
     sorted_temp = sort_best_from_tuple(search_random_setu(keyword, k), k, config_with_key("randomness"))
-    b64_list = []
-    threads = []
-    if sorted_temp:
-        for illust, view in sorted_temp:
-            thread = threading.Thread(target=download_illust, args=(illust.id,))
-            threads.append(thread)
-            thread.start()
-        for i in threads:
-            i.join()
-        for illust, view in sorted_temp:
-            b64_list.append((illust, get_illust_b64(illust.id)))
+    b64_list = multi_thread_download_illust(sorted_temp)
     return b64_list
 
 
 def get_random_setu(k: int) -> list:
     sorted_temp = sort_best_from_tuple(recommended_random_setu(k), k, 1)
+    b64_list = multi_thread_download_illust(sorted_temp)
+    return b64_list
+
+
+def multi_thread_download_illust(sorted_temp):
     b64_list = []
     threads = []
     if sorted_temp:
@@ -103,10 +97,10 @@ def download_illust(illust_id: int) -> dict:
     if not illust:
         return {}
     if not os.path.isfile(illust_path(illust_id)):
-        req = urllib.request.Request(illust.image_urls['medium'],
-                                     headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.pixiv.net/'})
         with open(illust_path(illust_id), "wb") as f:
-            with urllib.request.urlopen(req) as r:
+            with urllib.request.urlopen(urllib.request.Request(illust.image_urls['medium'],
+                                                               headers={'User-Agent': 'Mozilla/5.0',
+                                                                        'Referer': 'https://www.pixiv.net/'})) as r:
                 f.write(r.read())
     return illust
 
@@ -121,5 +115,4 @@ def format_illust(illust: dict, b64: str, gid: int) -> str:
     setting = db.fetch_setting(gid)
     if setting['xml']:
         return f'[CQ:cardimage,file={b64},source={illust.title} (id:{illust.id} author:{illust.user.name})]'
-    else:
-        return f'title:{illust.title}\nauthor:{illust.user.name}\nid:{illust.id}\n[CQ:image,file=base64://{b64}]'
+    return f'title:{illust.title}\nauthor:{illust.user.name}\nid:{illust.id}\n[CQ:image,file=base64://{b64}]'
