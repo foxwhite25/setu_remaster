@@ -36,16 +36,20 @@ async def group_setting(bot, ev):
     setting = db.fetch_setting(gid)
     msg = ''
     if not is_su:
-        await bot.finish(ev, "invalid permission")
+        await bot.send(ev, "invalid permission")
+        return
     db.update_setting_version(gid)
     if args[0] == "get":
-        msg = f"Group {gid} setting:\n"
+        msg = f"Group {gid} setting:"
         for name, data in setting.items():
-            msg += f"{name} : {data}\n"
-        await bot.finish(ev, msg)
+            msg += f"\n{name} : {data}"
+        print(msg)
+        await bot.send(ev, msg)
+        return
     elif args[0] == "set":
         if args[1] not in setting:
-            await bot.finish(ev, "invalid parameter")
+            await bot.send(ev, "invalid parameter")
+            return
         if isinstance(setting[args[1]], bool):
             if args[2].lower() == "true".lower():
                 setting[args[1]] = True
@@ -65,12 +69,15 @@ async def group_setting(bot, ev):
             setting[args[1]] = args[2]
             msg = f"Group {gid} option {args[1]} set to {args[2]}"
         db.update_setting(gid, setting)
-        await bot.finish(ev, msg)
+        await bot.send(ev, msg)
+        return
     elif args[0] == 'warehouse':
         num = len(os.listdir(os.path.join(path_dirname, 'illust')))
-        await bot.finish(ev, f"Current illust count : {num}")
+        await bot.send(ev, f"Current illust count : {num}")
+        return
     else:
-        await bot.finish(ev, "invalid parameter")
+        await bot.send(ev, "invalid parameter")
+        return
 
 
 @sv.on_rex(r'^不够[涩瑟色]|^再来[点张份]|^[涩瑟色]图$|^[再]?来?(\d*)?[份点张]([涩色瑟]图)')
@@ -86,7 +93,8 @@ async def send_random_setu(bot, ev):
         pass
     msg = check_lmt(uid, num)
     if msg:
-        await bot.finish(ev, msg)
+        await bot.send(ev, msg)
+        return
     b64_list = get_random_setu(num)
     await send_illust_list(uid, gid, setting, b64_list, bot, ev)
 
@@ -98,7 +106,8 @@ async def send_search_setu(bot, ev):
     setting = db.fetch_setting(gid)
     keyword = ev['match'].group(2) or ev['match'].group(3)
     if not keyword:
-        await bot.finish(ev, '需要提供关键字')
+        await bot.send(ev, '需要提供关键字')
+        return
     keyword = keyword.strip()
     num = ev['match'].group(1)
     if num:
@@ -107,7 +116,8 @@ async def send_search_setu(bot, ev):
         num = 1
     msg = check_lmt(uid, num)
     if msg:
-        await bot.finish(ev, msg)
+        await bot.send(ev, msg)
+        return
     b64_list = get_search_setu(keyword, num)
     await send_illust_list(uid, gid, setting, b64_list, bot, ev)
 
@@ -121,10 +131,12 @@ async def get_illust(bot, ev):
     b64_list = []
     for arg in args:
         if not arg.isnumeric():
-            bot.finish(ev, "id应为数字")
+            bot.send(ev, "id应为数字")
+            return
         illust = download_illust(arg)
         if not illust:
-            bot.finish(ev, f"找不到id为{arg}的图片")
+            bot.send(ev, f"找不到id为{arg}的图片")
+            return
         b64 = get_illust_b64(arg)
         b64_list.append((illust, b64))
     await send_illust_list(uid, gid, setting, b64_list, bot, ev)
