@@ -8,7 +8,8 @@ import ujson as json
 
 path_dirname = os.path.dirname(__file__)
 config_path = os.path.join(path_dirname, 'config.json')
-pathlib.Path(os.path.join(path_dirname, 'illust')).mkdir(parents=True, exist_ok=True)
+illust_path = os.path.join(path_dirname, 'illust')
+pathlib.Path(illust_path).mkdir(parents=True, exist_ok=True)
 
 
 def load_config():

@@ -1,11 +1,12 @@
 import asyncio
 import os
+import time
 
 import hoshino
 from hoshino.util import DailyNumberLimiter
 
 from .data import get_random_setu, get_search_setu, download_illust, get_illust_b64, format_illust
-from .lib import config_with_key, RecordDAO, path_dirname
+from .lib import config_with_key, RecordDAO, path_dirname, illust_path
 
 sv = hoshino.Service('setu_remaster', bundle='pcr娱乐')
 tlmt = hoshino.util.DailyNumberLimiter(config_with_key('daily_max'))
@@ -131,11 +132,11 @@ async def get_illust(bot, ev):
     b64_list = []
     for arg in args:
         if not arg.isnumeric():
-            bot.send(ev, "id应为数字")
+            await bot.send(ev, "id应为数字")
             return
         illust = download_illust(arg)
         if not illust:
-            bot.send(ev, f"找不到id为{arg}的图片")
+            await bot.send(ev, f"找不到id为{arg}的图片")
             return
         b64 = get_illust_b64(arg)
         b64_list.append((illust, b64))
@@ -177,3 +178,12 @@ async def send_illust_list(uid, gid, setting, b64_list, bot, ev):
                     await bot.delete_msg(self_id=ev['self_id'], message_id=result['message_id'])
                 except Exception:
                     print('撤回失败')
+
+
+@sv.scheduled_job('cron', hour='*')
+async def delete_old_illust():
+    now = time.time()
+    for f in os.listdir(illust_path):
+        f = os.path.join(illust_path,f)
+        if os.stat(f).st_atime < now - 3600 and os.path.isfile(f):
+            os.remove(f)

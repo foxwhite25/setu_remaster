@@ -98,7 +98,7 @@ def download_illust(illust_id: int) -> dict:
         return {}
     if not os.path.isfile(illust_path(illust_id)):
         with open(illust_path(illust_id), "wb") as f:
-            with urllib.request.urlopen(urllib.request.Request(illust.image_urls['medium'],
+            with urllib.request.urlopen(urllib.request.Request(illust.image_urls['large'],
                                                                headers={'User-Agent': 'Mozilla/5.0',
                                                                         'Referer': 'https://www.pixiv.net/'})) as r:
                 f.write(r.read())
