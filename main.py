@@ -6,7 +6,7 @@ import hoshino
 from hoshino.util import DailyNumberLimiter
 
 from .data import get_random_setu, get_search_setu, download_illust, get_illust_b64, format_illust
-from .lib import config_with_key, RecordDAO, path_dirname, illust_path
+from .lib import config_with_key, RecordDAO, path_dirname, illust_dir_path
 
 sv = hoshino.Service('setu_remaster', bundle='pcr娱乐')
 tlmt = hoshino.util.DailyNumberLimiter(config_with_key('daily_max'))
@@ -84,8 +84,6 @@ async def group_setting(bot, ev):
 @sv.on_rex(r'^不够[涩瑟色]|^再来[点张份]|^[涩瑟色]图$|^[再]?来?(\d*)?[份点张]([涩色瑟]图)')
 async def send_random_setu(bot, ev):
     uid = ev['user_id']
-    gid = ev['group_id']
-    setting = db.fetch_setting(gid)
     num = 1
     match = ev['match']
     try:
@@ -97,14 +95,12 @@ async def send_random_setu(bot, ev):
         await bot.send(ev, msg)
         return
     b64_list = get_random_setu(num)
-    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
+    await send_illust_list(b64_list, bot, ev)
 
 
 @sv.on_rex(r'^搜[索]?(\d*)[份张]*(.*?)[涩瑟色]图(.*)')
 async def send_search_setu(bot, ev):
     uid = ev['user_id']
-    gid = ev['group_id']
-    setting = db.fetch_setting(gid)
     keyword = ev['match'].group(2) or ev['match'].group(3)
     if not keyword:
         await bot.send(ev, '需要提供关键字')
@@ -120,14 +116,11 @@ async def send_search_setu(bot, ev):
         await bot.send(ev, msg)
         return
     b64_list = get_search_setu(keyword, num)
-    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
+    await send_illust_list(b64_list, bot, ev)
 
 
 @sv.on_prefix(r'提取图片')
 async def get_illust(bot, ev):
-    uid = ev['user_id']
-    gid = ev['group_id']
-    setting = db.fetch_setting(gid)
     args = ev.message.extract_plain_text().split()
     b64_list = []
     for arg in args:
@@ -140,10 +133,13 @@ async def get_illust(bot, ev):
             return
         b64 = get_illust_b64(arg)
         b64_list.append((illust, b64))
-    await send_illust_list(uid, gid, setting, b64_list, bot, ev)
+    await send_illust_list(b64_list, bot, ev)
 
 
-async def send_illust_list(uid, gid, setting, b64_list, bot, ev):
+async def send_illust_list(b64_list, bot, ev):
+    uid = ev['user_id']
+    gid = ev['group_id']
+    setting = db.fetch_setting(gid)
     if setting['foward']:
         foward_list = []
         for illust, b64 in b64_list:
@@ -183,7 +179,7 @@ async def send_illust_list(uid, gid, setting, b64_list, bot, ev):
 @sv.scheduled_job('cron', hour='*')
 async def delete_old_illust():
     now = time.time()
-    for f in os.listdir(illust_path):
-        f = os.path.join(illust_path,f)
+    for f in os.listdir(illust_dir_path):
+        f = os.path.join(illust_dir_path,f)
         if os.stat(f).st_atime < now - 3600 and os.path.isfile(f):
             os.remove(f)

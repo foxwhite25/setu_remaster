@@ -8,7 +8,7 @@ import ujson as json
 
 path_dirname = os.path.dirname(__file__)
 config_path = os.path.join(path_dirname, 'config.json')
-illust_path = os.path.join(path_dirname, 'illust')
+illust_dir_path = os.path.join(path_dirname, 'illust')
 pathlib.Path(illust_path).mkdir(parents=True, exist_ok=True)
 
 
