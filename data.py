@@ -14,9 +14,15 @@ papi = PixivAPI()
 aapi.set_accept_language('zh-cn')
 if config_with_key("proxy"):  # """Set proxy hosts: eg http://app-api.pixivlite.com"""
     aapi.set_api_proxy(config_with_key("proxy"))
+
+
+def auth():
+    aapi.auth(refresh_token=config_with_key("refresh_token"))
+    papi.auth(refresh_token=config_with_key("refresh_token"))
+
+
 # To get refresh token , ses https://gist.github.com/ZipFile/c9ebedb224406f4f11845ab700124362
-aapi.auth(refresh_token=config_with_key("refresh_token"))
-papi.auth(refresh_token=config_with_key("refresh_token"))
+auth()
 DB_PATH = os.path.expanduser("~/.hoshino/rate.db")
 db = RecordDAO(DB_PATH)
 

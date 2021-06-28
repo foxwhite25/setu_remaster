@@ -5,7 +5,7 @@ import time
 import hoshino
 from hoshino.util import DailyNumberLimiter
 
-from .data import get_random_setu, get_search_setu, download_illust, get_illust_b64, format_illust
+from .data import get_random_setu, get_search_setu, download_illust, get_illust_b64, format_illust, auth
 from .lib import config_with_key, RecordDAO, path_dirname, illust_dir_path
 
 sv = hoshino.Service('setu_remaster', bundle='pcr娱乐')
@@ -31,6 +31,7 @@ def check_lmt(uid: int, num: int) -> str:
 
 @sv.on_prefix('illust')
 async def group_setting(bot, ev):
+    auth()
     gid = ev['group_id']
     is_su = hoshino.priv.check_priv(ev, hoshino.priv.SUPERUSER)
     args = ev.message.extract_plain_text().split()
@@ -83,6 +84,7 @@ async def group_setting(bot, ev):
 
 @sv.on_rex(r'^不够[涩瑟色]|^再来[点张份]|^[涩瑟色]图$|^[再]?来?(\d*)?[份点张]([涩色瑟]图)')
 async def send_random_setu(bot, ev):
+    auth()
     uid = ev['user_id']
     num = 1
     match = ev['match']
@@ -100,6 +102,7 @@ async def send_random_setu(bot, ev):
 
 @sv.on_rex(r'^搜[索]?(\d*)[份张]*(.*?)[涩瑟色]图(.*)')
 async def send_search_setu(bot, ev):
+    auth()
     uid = ev['user_id']
     keyword = ev['match'].group(2) or ev['match'].group(3)
     if not keyword:
@@ -121,6 +124,7 @@ async def send_search_setu(bot, ev):
 
 @sv.on_prefix(r'提取图片')
 async def get_illust(bot, ev):
+    auth()
     args = ev.message.extract_plain_text().split()
     b64_list = []
     for arg in args:
