@@ -68,11 +68,11 @@ class RecordDAO:
         with self.connect() as conn:
             i = conn.execute(
                 'select data from gp where gid=?', (gid,)
-            ).fetchall()
+            ).fetchone()
         if not i:
             self.update_setting(gid, config_with_key("default"))
             return config_with_key("default")
-        return json.loads(i[0][0])
+        return json.loads(i[0])
 
     def update_setting(self, gid: int, data: dict):
         with self.connect() as conn:

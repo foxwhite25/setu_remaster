@@ -152,7 +152,7 @@ async def send_illust_list(b64_list, bot, ev):
                 "data": {
                     "name": '某lsp',
                     "uin": str(uid),
-                    "content": format_illust(illust, b64, gid)
+                    "content": format_illust(illust, b64, setting['xml'])
                 }
             }
             foward_list.append(data)
@@ -169,7 +169,7 @@ async def send_illust_list(b64_list, bot, ev):
     else:
         result_list = []
         for illust, b64 in b64_list:
-            result_list.append(await bot.send(ev, format_illust(illust, b64, gid)))
+            result_list.append(await bot.send(ev, format_illust(illust, b64, setting['xml'])))
             await asyncio.sleep(0.5)
         if setting['withdraw'] and setting['withdraw'] > 0:
             await asyncio.sleep(setting['withdraw'])

@@ -117,8 +117,7 @@ def get_illust_b64(illust_id: int) -> str:
         return b64
 
 
-def format_illust(illust: dict, b64: str, gid: int) -> str:
-    setting = db.fetch_setting(gid)
-    if setting['xml']:
+def format_illust(illust: dict, b64: str, xml:bool) -> str:
+    if xml:
         return f'[CQ:cardimage,file={b64},source={illust.title} (id:{illust.id} author:{illust.user.name})]'
     return f'title:{illust.title}\nauthor:{illust.user.name}\nid:{illust.id}\n[CQ:image,file=base64://{b64}]'
