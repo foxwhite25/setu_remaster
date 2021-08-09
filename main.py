@@ -151,7 +151,7 @@ async def send_illust_list(b64_list, bot, ev):
                 "type": "node",
                 "data": {
                     "name": '某lsp',
-                    "uin": str(uid),
+                    "uid": str(uid),
                     "content": format_illust(illust, b64, setting['xml'])
                 }
             }
